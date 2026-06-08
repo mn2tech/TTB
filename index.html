@@ -472,7 +472,7 @@ async function runAnalysis() {
     const messages = [{ role: "user", content: [] }];
     if (uploadedBase64) messages[0].content.push({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: uploadedBase64 } });
     messages[0].content.push({ type: "text", text: userPrompt });
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, system: systemPrompt, messages })

@@ -35,7 +35,32 @@ vercel
 - `vercel.json` — Vercel deployment config
 - `README.md` — This file
 
+## Environment Variables
+
+The API key must stay server-side. The browser calls `/api/analyze`, which proxies to Anthropic using `ANTHROPIC_API_KEY`.
+
+### Vercel (production)
+1. Open your project in the [Vercel dashboard](https://vercel.com/dashboard)
+2. Go to **Settings → Environment Variables**
+3. Add:
+
+| Name | Value |
+|---|---|
+| `ANTHROPIC_API_KEY` | Your key from [console.anthropic.com](https://console.anthropic.com/) |
+
+4. Enable it for **Production** (and Preview if you want)
+5. **Redeploy** after saving — env vars only apply on the next deploy
+
+### Local development
+```bash
+cp .env.example .env.local
+# Edit .env.local with your key, then:
+npx vercel dev
+```
+
+Do not put the API key in `index.html` or commit it to git.
+
 ## Tech Stack
 - Vanilla HTML/CSS/JS (no framework needed)
-- Claude API (claude-sonnet-4-20250514) for AI analysis
+- Claude API (claude-sonnet-4-20250514) via Vercel serverless proxy
 - Hosted on Vercel
