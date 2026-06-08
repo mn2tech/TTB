@@ -478,6 +478,10 @@ async function runAnalysis() {
       body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, system: systemPrompt, messages })
     });
     const data = await res.json();
+    if (!res.ok) {
+      const msg = data.error?.message || data.error || `Request failed (${res.status})`;
+      throw new Error(msg);
+    }
     const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g,'').trim();
     const result = JSON.parse(raw);
     renderReport(result);
