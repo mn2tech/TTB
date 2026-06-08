@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COLA AI — TTB Demonstration</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gov-blue: #112E51;
+  --gov-blue2: #205493;
+  --gov-red: #981B1E;
+  --gold: #C8A84B;
+  --gold2: #E8C870;
+  --white: #FFFFFF;
+  --offwhite: #F5F5F0;
+  --border: #D6D2C4;
+  --text: #1B1B1B;
+  --muted: #71767A;
+  --green: #2E8540;
+  --red: #CD2026;
+  --amber: #E5A000;
+  --panel: #FFFFFF;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: var(--offwhite); color: var(--text); min-height: 100vh; }
+.gov-banner { background: var(--gov-blue); color: white; padding: 6px 24px; font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+.gov-banner span { opacity: 0.6; }
+header { background: white; border-bottom: 4px solid var(--gov-blue); padding: 0 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 200; }
+.header-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+.header-logo { display: flex; align-items: center; gap: 16px; }
+.ttb-seal { width: 48px; height: 48px; background: var(--gov-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.header-titles h1 { font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 700; color: var(--gov-blue); line-height: 1.1; }
+.header-titles p { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; margin-top: 2px; }
+.demo-badge { background: var(--gov-red); color: white; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 2px; font-weight: 500; }
+.steps-nav { background: var(--gov-blue2); padding: 0 32px; display: flex; align-items: center; gap: 0; overflow-x: auto; }
+.step-tab { display: flex; align-items: center; gap: 10px; padding: 14px 24px; cursor: pointer; border-bottom: 3px solid transparent; color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
+.step-tab:hover { color: rgba(255,255,255,0.85); }
+.step-tab.active { color: white; border-bottom-color: var(--gold); background: rgba(255,255,255,0.08); }
+.step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.step-tab.active .step-num { background: var(--gold); color: var(--gov-blue); font-weight: 700; }
+.step-tab.done .step-num { background: var(--green); color: white; }
+.step-tab.done { color: rgba(255,255,255,0.7); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+.screen { display: none; animation: fadeUp 0.35s ease forwards; }
+.screen.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.screen-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.screen-header-text h2 { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 700; color: var(--gov-blue); margin-bottom: 4px; }
+.screen-header-text p { font-size: 14px; color: var(--muted); max-width: 580px; line-height: 1.5; }
+.card { background: white; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.card-header { background: var(--gov-blue); color: white; padding: 12px 20px; font-family: 'Source Serif 4', serif; font-size: 14px; font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+.card-body { padding: 20px; }
+.welcome-hero { background: var(--gov-blue); border-radius: 4px; padding: 48px 40px; color: white; margin-bottom: 28px; position: relative; overflow: hidden; }
+.welcome-hero::after { content: '⚖️'; position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 100px; opacity: 0.08; }
+.welcome-hero h2 { font-family: 'Source Serif 4', serif; font-size: 32px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; }
+.welcome-hero h2 span { color: var(--gold2); }
+.welcome-hero p { font-size: 15px; opacity: 0.8; max-width: 580px; line-height: 1.6; margin-bottom: 28px; }
+.welcome-stats { display: flex; gap: 0; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; max-width: 600px; }
+.welcome-stat { flex: 1; padding: 16px 20px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; }
+.welcome-stat:last-child { border-right: none; }
+.welcome-stat .n { font-family: 'Source Serif 4', serif; font-size: 28px; font-weight: 700; color: var(--gold2); display: block; }
+.welcome-stat .l { font-size: 11px; opacity: 0.6; margin-top: 2px; font-family: 'DM Mono', monospace; }
+.agenda-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+@media (max-width: 700px) { .agenda-grid { grid-template-columns: 1fr; } }
+.agenda-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--gov-blue2); border-radius: 2px; padding: 18px; cursor: pointer; transition: all 0.2s; }
+.agenda-card:hover { border-left-color: var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.agenda-card .num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-bottom: 6px; }
+.agenda-card h4 { font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 600; color: var(--gov-blue); margin-bottom: 4px; }
+.agenda-card p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.btn-start { background: var(--gov-red); color: white; border: none; padding: 14px 32px; font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 600; border-radius: 2px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 10px; }
+.btn-start:hover { background: #7a1518; transform: translateY(-1px); }
+.problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+@media (max-width: 700px) { .problem-grid { grid-template-columns: 1fr; } }
+.problem-stat { background: white; border: 1px solid var(--border); border-top: 4px solid var(--gov-red); padding: 20px 24px; border-radius: 2px; }
+.problem-stat .big { font-family: 'Source Serif 4', serif; font-size: 42px; font-weight: 700; color: var(--gov-red); line-height: 1; display: block; }
+.problem-stat h4 { font-size: 14px; font-weight: 600; color: var(--gov-blue); margin: 8px 0 4px; }
+.problem-stat p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.process-flow { background: white; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+.process-flow-header { background: var(--gov-blue); color: white; padding: 12px 20px; font-size: 13px; font-weight: 600; font-family: 'Source Serif 4', serif; }
+.process-steps { display: flex; align-items: stretch; overflow-x: auto; padding: 20px; gap: 0; }
+.process-step { flex: 1; min-width: 130px; text-align: center; position: relative; padding: 0 8px; }
+.process-step::after { content: '→'; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; }
+.process-step:last-child::after { display: none; }
+.ps-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 8px; }
+.ps-icon.blue { background: #E8F1FB; }
+.ps-icon.red { background: #FDE8E8; }
+.ps-icon.amber { background: #FEF3E2; }
+.process-step h5 { font-size: 12px; font-weight: 600; color: var(--gov-blue); margin-bottom: 2px; }
+.process-step p { font-size: 10px; color: var(--muted); line-height: 1.4; }
+.time-badge { display: inline-block; margin-top: 6px; font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #FDE8E8; color: var(--gov-red); }
+.builder-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+@media (max-width: 800px) { .builder-grid { grid-template-columns: 1fr; } }
+.preset-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.preset-item { border: 2px solid var(--border); border-radius: 4px; padding: 12px 14px; cursor: pointer; transition: all 0.2s; background: white; }
+.preset-item:hover, .preset-item.active { border-color: var(--gov-blue2); background: #EBF0F8; }
+.preset-item h4 { font-size: 13px; font-weight: 600; color: var(--gov-blue); margin-bottom: 2px; }
+.preset-item p { font-size: 11px; color: var(--muted); }
+.issue-toggle { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.issue-toggle:last-child { border-bottom: none; }
+.issue-toggle-label { font-size: 12px; color: var(--text); }
+.issue-toggle-sub { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.toggle { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+.toggle input { display: none; }
+.toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 18px; cursor: pointer; transition: 0.2s; }
+.toggle-slider::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: white; transition: 0.2s; }
+.toggle input:checked + .toggle-slider { background: var(--gov-red); }
+.toggle input:checked + .toggle-slider::after { transform: translateX(16px); }
+.label-canvas { background: #f0ede8; border: 1px solid var(--border); border-radius: 4px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; min-height: 400px; }
+.label-whiskey { width: 320px; background: #1a1208; color: #f0e6c8; border-radius: 2px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-family: 'Source Serif 4', serif; }
+.wh-top { background: linear-gradient(180deg,#2a1c08,#1a1208); padding: 24px 28px 14px; text-align: center; }
+.wh-eyebrow { font-size: 8px; letter-spacing: 3px; color: #b8860b; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.wh-brand { font-size: 28px; font-weight: 700; color: #f0e6c8; letter-spacing: 2px; }
+.wh-div { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.wh-div::before,.wh-div::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#b8860b,transparent); }
+.wh-div span { color:#b8860b; font-size:12px; }
+.wh-class { font-size: 13px; color: #c8a87a; font-style: italic; }
+.wh-mid { padding: 14px 28px; text-align: center; }
+.wh-crest { font-size: 40px; display: block; margin-bottom: 4px; }
+.wh-age-label { font-size: 9px; letter-spacing: 3px; color: #b8860b; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.wh-age-num { font-size: 36px; font-weight: 700; color: #f0e6c8; line-height: 1; }
+.wh-origin { font-size: 11px; color: #a0856a; font-style: italic; margin-top: 4px; }
+.wh-health-claim { font-size: 9px; color: #c8a87a; margin-top: 6px; font-style: italic; }
+.wh-bottom { background: linear-gradient(0deg,#0a0804,#1a1208); padding: 10px 28px 18px; text-align: center; }
+.wh-stats { display: flex; border: 1px solid rgba(184,134,11,0.2); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
+.wh-stat { flex:1; padding:6px 8px; border-right:1px solid rgba(184,134,11,0.2); text-align:center; }
+.wh-stat:last-child { border-right: none; }
+.wh-stat .v { font-size: 12px; color: #f0e6c8; display: block; font-weight: 600; }
+.wh-stat .k { font-size: 7px; color: #6b5a3a; letter-spacing: 0.5px; display: block; font-family: 'DM Mono', monospace; }
+.wh-warning { font-size: 6.5px; color: #5a4a2a; line-height: 1.5; text-align: left; border-top: 1px solid rgba(184,134,11,0.1); padding-top: 8px; }
+.wh-warning strong { color: #7a6a4a; }
+.label-wine { width: 320px; background: #faf6f0; color: #2a1a0e; border-radius: 2px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.2); font-family: 'Source Serif 4', serif; }
+.wine-hdr { background: #722f37; padding: 20px 28px 16px; text-align: center; }
+.wine-winery { font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.55); text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.wine-brand { font-size: 24px; font-weight: 700; color: white; letter-spacing: 1px; }
+.wine-body { padding: 16px 28px 12px; text-align: center; }
+.wine-icon { font-size: 36px; display: block; margin-bottom: 6px; }
+.wine-vintage { font-size: 9px; letter-spacing: 2px; color: #9b8a7a; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.wine-varietal { font-size: 22px; font-weight: 700; color: #722f37; margin: 2px 0; }
+.wine-appellation { font-size: 12px; color: #6b5040; font-style: italic; }
+.wine-desc { font-size: 10px; color: #8b7a6a; line-height: 1.6; font-style: italic; border-top: 1px solid #e8dfd0; border-bottom: 1px solid #e8dfd0; padding: 10px 0; margin: 10px 0; }
+.wine-ftr { background: #f0ece4; padding: 10px 28px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.wine-abv { font-size: 14px; font-weight: 700; color: #722f37; }
+.wine-health-claim { font-size: 9px; color: #8b6040; font-style: italic; margin-top: 4px; }
+.label-beer { width: 320px; background: #1a2e1a; color: #e8f0e8; border-radius: 2px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-family: 'Source Serif 4', serif; }
+.beer-hdr { background: linear-gradient(180deg,#c8860a,#a06808); padding: 18px 28px 28px; text-align: center; clip-path: polygon(0 0,100% 0,100% 82%,50% 100%,0 82%); }
+.beer-style-tag { font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.2); display: inline-block; padding: 2px 8px; border-radius: 10px; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+.beer-brand { font-size: 26px; font-weight: 700; color: white; letter-spacing: 1px; }
+.beer-body { padding: 18px 28px 14px; text-align: center; }
+.beer-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+.beer-name { font-size: 18px; font-weight: 700; color: #c8860a; }
+.beer-sub { font-size: 9px; letter-spacing: 2px; color: #5a7a5a; font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+.beer-stats { display: flex; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.beer-stat { flex:1; padding:8px 4px; border-right:1px solid rgba(255,255,255,0.05); text-align:center; }
+.beer-stat:last-child { border-right: none; }
+.beer-stat .v { font-size: 15px; color: #c8860a; display: block; font-weight: 700; }
+.beer-stat .k { font-size: 7px; color: #4a6a4a; letter-spacing: 0.5px; font-family: 'DM Mono', monospace; }
+.beer-ftr { background: #122012; padding: 10px 28px; display: flex; justify-content: space-between; font-size: 10px; color: #4a6a4a; font-family: 'DM Mono', monospace; }
+.beer-warning { font-size: 6.5px; color: #3a5a3a; line-height: 1.5; text-align: center; padding: 8px 28px; }
+.beer-health-claim { font-size: 9px; color: #7a9a7a; margin-top: 4px; }
+.issue-indicator { background: var(--gov-red); color: white; font-size: 10px; font-family: 'DM Mono', monospace; padding: 4px 10px; border-radius: 2px; display: inline-block; }
+.btn-next { background: var(--gov-blue); color: white; border: none; padding: 12px 28px; font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 600; border-radius: 2px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-next:hover { background: var(--gov-blue2); }
+.btn-secondary { background: white; color: var(--gov-blue); border: 2px solid var(--gov-blue); padding: 10px 24px; font-family: 'Source Serif 4', serif; font-size: 14px; font-weight: 600; border-radius: 2px; cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { background: #EBF0F8; }
+.validator-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .validator-layout { grid-template-columns: 1fr; } }
+.upload-zone { border: 2px dashed var(--border); border-radius: 4px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafaf8; }
+.upload-zone:hover { border-color: var(--gov-blue2); background: #EBF0F8; }
+.upload-zone h4 { font-size: 14px; font-weight: 600; color: var(--gov-blue); margin: 8px 0 4px; }
+.upload-zone p { font-size: 12px; color: var(--muted); }
+.form-field { margin-bottom: 14px; }
+.form-field label { display: block; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; margin-bottom: 5px; text-transform: uppercase; }
+.form-field input, .form-field select { width: 100%; border: 1px solid var(--border); border-radius: 2px; padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: white; outline: none; transition: border-color 0.2s; }
+.form-field input:focus, .form-field select:focus { border-color: var(--gov-blue2); }
+.btn-analyze { width: 100%; background: var(--gov-blue); color: white; border: none; padding: 13px; font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; border-radius: 2px; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+.btn-analyze:hover { background: var(--gov-blue2); }
+.btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--gov-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-steps { list-style: none; margin-top: 12px; text-align: left; display: inline-block; }
+.load-step { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); padding: 3px 0; opacity: 0; animation: fadeIn 0.4s forwards; }
+.load-step:nth-child(1) { animation-delay: 0.3s; }
+.load-step:nth-child(2) { animation-delay: 1.1s; }
+.load-step:nth-child(3) { animation-delay: 1.9s; }
+.load-step:nth-child(4) { animation-delay: 2.6s; }
+@keyframes fadeIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
+.summary-impact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+@media (max-width: 700px) { .summary-impact { grid-template-columns: 1fr; } }
+.impact-card { background: white; border: 1px solid var(--border); border-top: 4px solid var(--gov-blue); padding: 20px; text-align: center; border-radius: 2px; }
+.impact-card.green { border-top-color: var(--green); }
+.impact-card.gold { border-top-color: var(--gold); }
+.impact-card .big { font-family: 'Source Serif 4', serif; font-size: 36px; font-weight: 700; color: var(--gov-blue); display: block; }
+.impact-card.green .big { color: var(--green); }
+.impact-card.gold .big { color: #a07800; }
+.impact-card h4 { font-size: 13px; font-weight: 600; color: var(--gov-blue); margin: 6px 0 4px; }
+.impact-card p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.next-steps-list { display: flex; flex-direction: column; gap: 10px; }
+.next-step { background: white; border: 1px solid var(--border); border-left: 4px solid var(--gov-blue2); padding: 14px 18px; border-radius: 2px; display: flex; align-items: center; gap: 14px; }
+.next-step-num { width: 32px; height: 32px; background: var(--gov-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+.next-step h4 { font-size: 14px; font-weight: 600; color: var(--gov-blue); margin-bottom: 2px; }
+.next-step p { font-size: 12px; color: var(--muted); }
+.pilot-box { background: var(--gov-blue); color: white; border-radius: 4px; padding: 28px 32px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.pilot-box h3 { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.pilot-box p { font-size: 14px; opacity: 0.8; max-width: 500px; line-height: 1.5; }
+.btn-pilot { background: var(--gold); color: var(--gov-blue); border: none; padding: 14px 28px; font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; border-radius: 2px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+.nav-hint { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+#lbl-preview-img { max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 2px; border: 1px solid var(--border); background: white; margin-top: 10px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+</style>
+</head>
+<body>
+<div class="gov-banner">
+  🏛️ <span>U.S. Department of the Treasury · Alcohol and Tobacco Tax and Trade Bureau (TTB)</span>
+  &nbsp;·&nbsp; <span>COLA AI — Technology Demonstration · Confidential</span>
+</div>
+<header>
+  <div class="header-inner">
+    <div class="header-logo">
+      <div class="ttb-seal">⚖️</div>
+      <div class="header-titles">
+        <h1>COLA AI Validator</h1>
+        <p>Certificate of Label Approval · AI-Powered Compliance Platform</p>
+      </div>
+    </div>
+    <div class="demo-badge">LIVE DEMONSTRATION</div>
+  </div>
+</header>
+<nav class="steps-nav">
+  <div class="step-tab active" id="tab-0" onclick="goTo(0)"><div class="step-num">0</div> Overview</div>
+  <div class="step-tab" id="tab-1" onclick="goTo(1)"><div class="step-num">1</div> The Problem</div>
+  <div class="step-tab" id="tab-2" onclick="goTo(2)"><div class="step-num">2</div> Build a Label</div>
+  <div class="step-tab" id="tab-3" onclick="goTo(3)"><div class="step-num">3</div> AI Validation</div>
+  <div class="step-tab" id="tab-4" onclick="goTo(4)"><div class="step-num">4</div> Impact & Next Steps</div>
+</nav>
+<div class="main">
+  <div class="screen active" id="screen-0">
+    <div class="welcome-hero">
+      <h2>Transforming TTB's<br><span>Label Approval Process</span> with AI</h2>
+      <p>Today we'll demonstrate how AI can pre-validate alcohol beverage labels before submission — reducing rejections, cutting review time, and helping TTB process applications faster.</p>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><span class="n">100K+</span><span class="l">COLA APPS / YEAR</span></div>
+        <div class="welcome-stat"><span class="n">30–60d</span><span class="l">AVG REVIEW TIME</span></div>
+        <div class="welcome-stat"><span class="n">~40%</span><span class="l">REJECTION RATE</span></div>
+        <div class="welcome-stat"><span class="n">&lt;30s</span><span class="l">AI CHECK TIME</span></div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;font-family:'DM Mono',monospace;letter-spacing:0.5px;">TODAY'S AGENDA — 4 STEPS</p>
+    <div class="agenda-grid">
+      <div class="agenda-card" onclick="goTo(1)"><div class="num">STEP 01</div><h4>The Problem</h4><p>Why the current COLA process creates backlogs and frustrates producers</p></div>
+      <div class="agenda-card" onclick="goTo(2)"><div class="num">STEP 02</div><h4>Build a Label</h4><p>Generate a sample label with real compliance violations to test</p></div>
+      <div class="agenda-card" onclick="goTo(3)"><div class="num">STEP 03</div><h4>Live AI Validation</h4><p>Watch Claude AI analyze the label against 27 CFR rules in real time</p></div>
+      <div class="agenda-card" onclick="goTo(4)"><div class="num">STEP 04</div><h4>Impact & Pilot</h4><p>Projected outcomes and proposed next steps for TTB collaboration</p></div>
+    </div>
+    <button class="btn-start" onclick="goTo(1)">Begin Demonstration →</button>
+  </div>
+  <div class="screen" id="screen-1">
+    <div class="screen-header"><div class="screen-header-text"><h2>The Current COLA Challenge</h2><p>TTB receives over 100,000 label approval applications per year. The manual review process creates bottlenecks that slow down the entire alcohol beverage industry.</p></div></div>
+    <div class="problem-grid">
+      <div class="problem-stat"><span class="big">30–60</span><h4>Days Average Review Time</h4><p>Producers wait up to two months before knowing if their label is approved — delaying product launches and market entry.</p></div>
+      <div class="problem-stat"><span class="big">~40%</span><h4>Application Rejection Rate</h4><p>Nearly half of all COLA applications are rejected — most for predictable, avoidable errors that a pre-check could catch instantly.</p></div>
+      <div class="problem-stat"><span class="big">100+</span><h4>Regulatory Rules to Check</h4><p>27 CFR Parts 4, 5, and 7 contain hundreds of specific labeling requirements. Manually checking each one is time-consuming and error-prone.</p></div>
+      <div class="problem-stat"><span class="big">2×</span><h4>Resubmission Cycle Cost</h4><p>Each rejection doubles the wait time. Producers redesign, resubmit, and wait again — sometimes through multiple rejection cycles.</p></div>
+    </div>
+    <div class="process-flow">
+      <div class="process-flow-header">Current COLA Process Flow — Without AI Assistance</div>
+      <div class="process-steps">
+        <div class="process-step"><div class="ps-icon blue">🎨</div><h5>Label Design</h5><p>Producer designs label without knowing TTB requirements</p></div>
+        <div class="process-step"><div class="ps-icon blue">📤</div><h5>Submit to TTB</h5><p>Upload via myTTB portal</p><span class="time-badge">Day 1</span></div>
+        <div class="process-step"><div class="ps-icon amber">⏳</div><h5>Manual Review</h5><p>TTB specialist manually checks every element</p><span class="time-badge">30–60 days</span></div>
+        <div class="process-step"><div class="ps-icon red">❌</div><h5>Rejection</h5><p>Vague feedback. Producer must revise and resubmit</p><span class="time-badge">+30–60 days</span></div>
+        <div class="process-step"><div class="ps-icon blue">✅</div><h5>Approval</h5><p>COLA issued. Product can now be sold.</p><span class="time-badge">60–120+ days</span></div>
+      </div>
+    </div>
+    <div class="nav-row"><button class="btn-secondary" onclick="goTo(0)">← Back</button><span class="nav-hint">STEP 1 OF 4</span><button class="btn-next" onclick="goTo(2)">Build a Test Label →</button></div>
+  </div>
+  <div class="screen" id="screen-2">
+    <div class="screen-header"><div class="screen-header-text"><h2>Build a Sample Label</h2><p>Select a preset label below. Toggle compliance issues on or off to simulate real-world scenarios TTB reviewers encounter daily.</p></div></div>
+    <div class="builder-grid">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">📋 Select Preset Label</div>
+          <div class="card-body" style="padding:12px">
+            <div class="preset-list">
+              <div class="preset-item active" onclick="loadPreset('whiskey-issues', this)"><h4>🥃 Eagle Ridge Whiskey <span style="color:var(--gov-red);font-size:10px;font-family:'DM Mono',monospace;">● HAS ISSUES</span></h4><p>Low ABV, wrong format, prohibited health claim</p></div>
+              <div class="preset-item" onclick="loadPreset('whiskey-clean', this)"><h4>🥃 Kentucky Oak Bourbon <span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">● COMPLIANT</span></h4><p>All fields correct, should pass COLA review</p></div>
+              <div class="preset-item" onclick="loadPreset('wine-clean', this)"><h4>🍷 Silverstone Cabernet <span style="color:var(--green);font-size:10px;font-family:'DM Mono',monospace;">● COMPLIANT</span></h4><p>Properly formatted wine label</p></div>
+              <div class="preset-item" onclick="loadPreset('beer-warn', this)"><h4>🍺 Coastal Pale Ale <span style="color:var(--amber);font-size:10px;font-family:'DM Mono',monospace;">● WARNINGS</span></h4><p>Questionable marketing claims</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">⚠️ Toggle Compliance Issues</div>
+          <div class="card-body" style="padding:12px 16px">
+            <div class="issue-toggle"><div><div class="issue-toggle-label">Omit Health Warning</div><div class="issue-toggle-sub">FHWA required on all labels</div></div><label class="toggle"><input type="checkbox" id="t-nowarning" onchange="renderBuilderLabel()"><span class="toggle-slider"></span></label></div>
+            <div class="issue-toggle"><div><div class="issue-toggle-label">Wrong ABV Format</div><div class="issue-toggle-sub">Must be "X% alc/vol" per 27 CFR</div></div><label class="toggle"><input type="checkbox" id="t-abvformat" onchange="renderBuilderLabel()"><span class="toggle-slider"></span></label></div>
+            <div class="issue-toggle"><div><div class="issue-toggle-label">Add Health Claim</div><div class="issue-toggle-sub">Prohibited per 27 CFR § 5.245</div></div><label class="toggle"><input type="checkbox" id="t-healthclaim" onchange="renderBuilderLabel()"><span class="toggle-slider"></span></label></div>
+            <div class="issue-toggle"><div><div class="issue-toggle-label">Omit Net Contents</div><div class="issue-toggle-sub">Mandatory statement</div></div><label class="toggle"><input type="checkbox" id="t-novolume" onchange="renderBuilderLabel()"><span class="toggle-slider"></span></label></div>
+          </div>
+        </div>
+      </div>
+      <div class="label-canvas" id="label-canvas">
+        <p style="font-family:'DM Mono',monospace;font-size:11px;color:#999;letter-spacing:1px;">LABEL PREVIEW</p>
+        <div id="builder-label-output"></div>
+        <div id="issue-count-display"></div>
+        <button class="btn-next" onclick="sendToValidator()" style="margin-top:8px;">Send to AI Validator →</button>
+      </div>
+    </div>
+    <div class="nav-row"><button class="btn-secondary" onclick="goTo(1)">← Back</button><span class="nav-hint">STEP 2 OF 4</span><button class="btn-next" onclick="sendToValidator()">Proceed to AI Validation →</button></div>
+  </div>
+  <div class="screen" id="screen-3">
+    <div class="screen-header"><div class="screen-header-text"><h2>AI Compliance Validation</h2><p>The system analyzes the label against TTB's regulatory ruleset and returns a detailed compliance report in under 30 seconds.</p></div></div>
+    <div class="validator-layout">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">🏷️ Label Under Review</div>
+          <div class="card-body">
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+              <div style="font-size:32px;margin-bottom:8px;">📄</div>
+              <h4>Upload Label Image</h4>
+              <p>JPG, PNG · or use the label from Step 2</p>
+              <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+            </div>
+            <img id="lbl-preview-img" style="display:none">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">📝 Product Information</div>
+          <div class="card-body">
+            <div class="form-field"><label>Product Type</label><select id="v-type"><option value="distilled spirits">Distilled Spirits</option><option value="wine">Wine</option><option value="malt beverage">Malt Beverage / Beer</option></select></div>
+            <div class="field-row">
+              <div class="form-field"><label>Brand Name</label><input type="text" id="v-brand" placeholder="e.g. Eagle Ridge"></div>
+              <div class="form-field"><label>ABV %</label><input type="text" id="v-abv" placeholder="e.g. 38"></div>
+            </div>
+            <div class="field-row">
+              <div class="form-field"><label>Net Contents</label><input type="text" id="v-volume" placeholder="e.g. 750ml"></div>
+              <div class="form-field"><label>Additional Claims</label><input type="text" id="v-claims" placeholder="e.g. Heart Healthy"></div>
+            </div>
+            <button class="btn-analyze" id="btn-analyze" onclick="runAnalysis()">⚡ Run AI Compliance Check</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="height:100%">
+          <div class="card-header">📊 Compliance Report</div>
+          <div class="card-body" id="report-body">
+            <div style="text-align:center;padding:48px 20px;color:var(--muted);">
+              <div style="font-size:48px;margin-bottom:12px;">🔍</div>
+              <p style="font-size:14px;font-weight:600;color:var(--gov-blue);margin-bottom:4px;">Awaiting Analysis</p>
+              <p style="font-size:12px;">Fill in product details and click "Run AI Compliance Check" to see the report.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row"><button class="btn-secondary" onclick="goTo(2)">← Back</button><span class="nav-hint">STEP 3 OF 4</span><button class="btn-next" id="btn-view-impact" onclick="goTo(4)" style="display:none">View Impact Summary →</button></div>
+  </div>
+  <div class="screen" id="screen-4">
+    <div class="screen-header"><div class="screen-header-text"><h2>Projected Impact & Next Steps</h2><p>Based on the demonstration, here is the projected value of deploying COLA AI within TTB's review workflow.</p></div></div>
+    <div class="summary-impact">
+      <div class="impact-card green"><span class="big">70%</span><h4>Reduction in Rejections</h4><p>Most rejections stem from predictable, rule-based errors that AI catches instantly</p></div>
+      <div class="impact-card"><span class="big">85%</span><h4>Faster Time to Decision</h4><p>Pre-validated applications require significantly less specialist review time</p></div>
+      <div class="impact-card gold"><span class="big">$M</span><h4>Industry Cost Savings</h4><p>Faster approvals translate to earlier product launches and reduced compliance costs</p></div>
+    </div>
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header">🗺️ Proposed Implementation Roadmap</div>
+      <div class="card-body">
+        <div class="next-steps-list">
+          <div class="next-step"><div class="next-step-num">1</div><div><h4>90-Day Free Pilot Program</h4><p>Deploy COLA AI as a voluntary pre-submission tool for 50 registered producers. Measure rejection rate reduction vs. control group.</p></div></div>
+          <div class="next-step"><div class="next-step-num">2</div><div><h4>TTB Specialist Integration</h4><p>Provide TTB reviewers with an AI-generated pre-screening report alongside each application. Specialists focus on flagged edge cases only.</p></div></div>
+          <div class="next-step"><div class="next-step-num">3</div><div><h4>myTTB Portal Integration</h4><p>Embed COLA AI directly into the myTTB submission workflow. Applicants receive instant feedback before hitting submit.</p></div></div>
+          <div class="next-step"><div class="next-step-num">4</div><div><h4>Full Deployment & Analytics</h4><p>Nationwide rollout with a compliance analytics dashboard for TTB leadership — tracking patterns, common violations, and processing efficiency.</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pilot-box">
+      <div><h3>Ready to Start the Pilot?</h3><p>We propose a no-cost 90-day pilot with 50 producers. We handle setup, training, and reporting. TTB retains full control of the approval process.</p></div>
+      <button class="btn-pilot">Request Pilot Program</button>
+    </div>
+    <div class="nav-row"><button class="btn-secondary" onclick="goTo(3)">← Back to Demo</button><span class="nav-hint">END OF DEMONSTRATION</span><button class="btn-next" onclick="goTo(0)">Restart Demonstration ↺</button></div>
+  </div>
+</div>
+<script>
+let currentScreen = 0;
+let uploadedBase64 = null;
+let builderState = { type:'whiskey', brand:'EAGLE RIDGE', product:'American Whiskey', abv:'38', volume:'750ml', origin:'Distilled in Kentucky', nowarning:false, abvformat:true, healthclaim:true, novolume:false };
+const PRESETS = {
+  'whiskey-issues': { type:'whiskey', brand:'EAGLE RIDGE', product:'American Whiskey', abv:'38', volume:'750ml', origin:'Distilled in Kentucky', nowarning:false, abvformat:true, healthclaim:true, novolume:false },
+  'whiskey-clean':  { type:'whiskey', brand:'KENTUCKY OAK', product:'Straight Bourbon Whiskey', abv:'45', volume:'750 mL', origin:'Distilled and Bottled in Kentucky, USA', nowarning:false, abvformat:false, healthclaim:false, novolume:false },
+  'wine-clean':     { type:'wine', brand:'SILVERSTONE', product:'Cabernet Sauvignon', abv:'13.5', volume:'750 mL', origin:'Napa Valley, California', nowarning:false, abvformat:false, healthclaim:false, novolume:false },
+  'beer-warn':      { type:'beer', brand:'COASTAL', product:'Pale Ale', abv:'5.2', volume:'12 fl oz', origin:'Brewed in San Diego, CA', nowarning:false, abvformat:false, healthclaim:true, novolume:false }
+};
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i === n));
+  document.querySelectorAll('.step-tab').forEach((t,i) => { t.classList.remove('active','done'); if(i===n) t.classList.add('active'); else if(i<n) t.classList.add('done'); });
+  currentScreen = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function loadPreset(key, el) {
+  builderState = { ...PRESETS[key] };
+  document.getElementById('t-nowarning').checked = builderState.nowarning;
+  document.getElementById('t-abvformat').checked = builderState.abvformat;
+  document.getElementById('t-healthclaim').checked = builderState.healthclaim;
+  document.getElementById('t-novolume').checked = builderState.novolume;
+  document.querySelectorAll('.preset-item').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderBuilderLabel();
+}
+function renderBuilderLabel() {
+  builderState.nowarning = document.getElementById('t-nowarning').checked;
+  builderState.abvformat = document.getElementById('t-abvformat').checked;
+  builderState.healthclaim = document.getElementById('t-healthclaim').checked;
+  builderState.novolume = document.getElementById('t-novolume').checked;
+  const abv = builderState.abvformat ? builderState.abv + '%' : builderState.abv + '% alc/vol';
+  const vol = builderState.novolume ? '' : builderState.volume;
+  const warning = builderState.nowarning ? '' : 'GOVERNMENT WARNING: (1) Women should not drink alcoholic beverages during pregnancy because of birth defect risk. (2) Consumption impairs driving ability and may cause health problems.';
+  const hclaim = builderState.healthclaim;
+  let html = '';
+  if (builderState.type === 'whiskey') {
+    html = `<div class="label-whiskey"><div class="wh-top"><div class="wh-eyebrow">Est. 1887 · Small Batch</div><div class="wh-brand">${builderState.brand}</div><div class="wh-div"><span>✦</span></div><div class="wh-class">${builderState.product}</div></div><div class="wh-mid"><span class="wh-crest">🦅</span><div class="wh-age-label">Aged</div><div class="wh-age-num">12</div><div class="wh-origin">${builderState.origin}</div>${hclaim ? '<div class="wh-health-claim">✦ Heart Healthy Choice · Antioxidant Rich ✦</div>' : ''}</div><div class="wh-bottom"><div class="wh-stats"><div class="wh-stat"><span class="v">${abv}</span><span class="k">ALCOHOL</span></div><div class="wh-stat"><span class="v">${vol||'—'}</span><span class="k">NET CONTENTS</span></div><div class="wh-stat"><span class="v">USA</span><span class="k">COUNTRY</span></div></div>${warning ? `<div class="wh-warning"><strong>GOVERNMENT WARNING:</strong> ${warning.replace('GOVERNMENT WARNING: ','')}</div>` : '<div style="height:8px"></div>'}</div></div>`;
+  } else if (builderState.type === 'wine') {
+    html = `<div class="label-wine"><div class="wine-hdr"><div class="wine-winery">Estate Winery · Since 1952</div><div class="wine-brand">${builderState.brand}</div></div><div class="wine-body"><span class="wine-icon">🍷</span><div class="wine-vintage">Vintage 2021</div><div class="wine-varietal">${builderState.product}</div><div class="wine-appellation">${builderState.origin}</div><div class="wine-desc">Rich aromas of dark cherry and cassis with notes of cedar. Full-bodied with silky tannins.</div>${hclaim ? '<div class="wine-health-claim">✦ Rich in Antioxidants · Heart Healthy ✦</div>' : ''}${warning ? `<div style="font-size:7px;color:#8b7a6a;line-height:1.5;text-align:left;margin-top:8px;border-top:1px solid #e8dfd0;padding-top:8px;"><strong>GOVERNMENT WARNING:</strong> ${warning.replace('GOVERNMENT WARNING: ','')}</div>` : '<div style="font-size:9px;color:#c0a080;margin-top:8px;text-align:center;">Contains Sulfites</div>'}</div><div class="wine-ftr"><div><div class="wine-abv">${abv}</div><div style="font-size:8px;color:#9b8a7a;font-family:'DM Mono',monospace;">ALC BY VOL</div></div><div style="font-size:9px;color:#9b8a7a;font-family:'DM Mono',monospace;">${vol}</div></div></div>`;
+  } else {
+    html = `<div class="label-beer"><div class="beer-hdr"><div class="beer-style-tag">CRAFT BREWERY</div><div class="beer-brand">${builderState.brand}</div></div><div class="beer-body"><span class="beer-icon">🍺</span><div class="beer-name">${builderState.product}</div><div class="beer-sub">${builderState.origin}</div><div class="beer-stats"><div class="beer-stat"><span class="v">${abv}</span><span class="k">ALC/VOL</span></div><div class="beer-stat"><span class="v">45</span><span class="k">IBU</span></div><div class="beer-stat"><span class="v">${vol||'—'}</span><span class="k">NET CONT.</span></div></div>${hclaim ? '<div class="beer-health-claim">ALL NATURAL · LOW CARB · GLUTEN FREE</div>' : ''}</div><div class="beer-ftr"><span>${vol}</span><span>BREWED IN USA</span></div>${warning ? `<div class="beer-warning"><strong style="color:#5a7a5a;">GOVERNMENT WARNING:</strong> ${warning.replace('GOVERNMENT WARNING: ','')}</div>` : '<div style="height:12px;background:#1a2e1a;"></div>'}</div>`;
+  }
+  document.getElementById('builder-label-output').innerHTML = html;
+  let issues = 0;
+  if (builderState.nowarning) issues++;
+  if (builderState.abvformat) issues++;
+  if (builderState.healthclaim) issues++;
+  if (builderState.novolume) issues++;
+  if (builderState.type === 'whiskey' && parseFloat(builderState.abv) < 40) issues++;
+  const ic = document.getElementById('issue-count-display');
+  ic.innerHTML = issues > 0 ? `<span class="issue-indicator">⚠ ${issues} Potential Violation${issues>1?'s':''} Detected</span>` : `<span style="background:var(--green);color:white;font-size:10px;font-family:'DM Mono',monospace;padding:4px 10px;border-radius:2px;">✓ No Obvious Issues</span>`;
+}
+function sendToValidator() {
+  document.getElementById('v-type').value = builderState.type === 'whiskey' ? 'distilled spirits' : builderState.type === 'wine' ? 'wine' : 'malt beverage';
+  document.getElementById('v-brand').value = builderState.brand;
+  document.getElementById('v-abv').value = builderState.abvformat ? builderState.abv + '%' : builderState.abv + '% alc/vol';
+  document.getElementById('v-volume').value = builderState.novolume ? '[MISSING]' : builderState.volume;
+  document.getElementById('v-claims').value = [builderState.healthclaim ? 'Heart Healthy, Antioxidant Rich' : '', builderState.nowarning ? '[No Government Warning]' : ''].filter(Boolean).join(', ') || 'None';
+  goTo(3);
+}
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedBase64 = e.target.result.split(',')[1];
+    const img = document.getElementById('lbl-preview-img');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('upload-zone').querySelector('p').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+async function runAnalysis() {
+  const btn = document.getElementById('btn-analyze');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  const reportBody = document.getElementById('report-body');
+  reportBody.innerHTML = `<div style="padding:32px;text-align:center;"><div class="spinner"></div><p style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gov-blue);font-weight:600;">RUNNING COMPLIANCE CHECK</p><ul class="load-steps"><li class="load-step">▸ Parsing label elements...</li><li class="load-step">▸ Checking mandatory statements...</li><li class="load-step">▸ Validating alcohol content (27 CFR)...</li><li class="load-step">▸ Cross-referencing regulatory ruleset...</li></ul></div>`;
+  const productType = document.getElementById('v-type').value;
+  const brand = document.getElementById('v-brand').value || 'Unknown';
+  const abv = document.getElementById('v-abv').value || 'Not stated';
+  const volume = document.getElementById('v-volume').value || 'Not stated';
+  const claims = document.getElementById('v-claims').value || 'None';
+  const systemPrompt = `You are a TTB COLA compliance expert. Respond ONLY with valid JSON, no markdown, no extra text. Keep all string values under 120 characters.\n\nJSON structure:\n{\n  "score": <0-100>,\n  "verdict": "<APPROVED FOR SUBMISSION | NEEDS REVISIONS | REJECTED>",\n  "verdictSub": "<short summary under 100 chars>",\n  "checks": [\n    {"rule":"<27 CFR cite>","title":"<short name>","status":"<pass|fail|warn>","description":"<under 100 chars>","fix":"<under 100 chars or null>"}\n  ]\n}\n\nReturn exactly 6 checks. Keep every string short.`;
+  const userPrompt = `Check this ${productType} label for TTB COLA compliance:\nBrand: ${brand} | ABV: ${abv} | Net Contents: ${volume} | Claims: ${claims}\n${uploadedBase64 ? 'Label image provided.' : 'No image — use stated data only.'}\nCheck: ABV format, net contents, health warning, class/type, prohibited claims, mandatory statements.`;
+  try {
+    const messages = [{ role: "user", content: [] }];
+    if (uploadedBase64) messages[0].content.push({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: uploadedBase64 } });
+    messages[0].content.push({ type: "text", text: userPrompt });
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, system: systemPrompt, messages })
+    });
+    const data = await res.json();
+    const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g,'').trim();
+    const result = JSON.parse(raw);
+    renderReport(result);
+  } catch(err) {
+    reportBody.innerHTML = `<div style="padding:24px;text-align:center;color:var(--red);"><p style="font-weight:600;">Analysis failed</p><p style="font-size:12px;margin-top:4px;">${err.message}</p></div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Run AI Compliance Check';
+  }
+}
+function renderReport(result) {
+  const score = result.score;
+  const scoreColor = score >= 80 ? '#2E8540' : score >= 60 ? '#E5A000' : '#CD2026';
+  const passes = result.checks.filter(c => c.status === 'pass').length;
+  const fails = result.checks.filter(c => c.status === 'fail').length;
+  const warns = result.checks.filter(c => c.status === 'warn').length;
+  const sorted = [...result.checks.filter(c => c.status==='fail'), ...result.checks.filter(c => c.status==='warn'), ...result.checks.filter(c => c.status==='pass')];
+  document.getElementById('report-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--gov-blue);border-radius:4px;margin-bottom:16px;flex-wrap:wrap;">
+      <div style="width:68px;height:68px;border-radius:50%;border:3px solid ${scoreColor};display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;color:${scoreColor};line-height:1;">${score}</span>
+        <span style="font-size:8px;font-family:'DM Mono',monospace;color:rgba(255,255,255,0.5);letter-spacing:0.5px;">SCORE</span>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Source Serif 4',serif;font-size:18px;font-weight:700;color:white;">${result.verdict}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">${result.verdictSub}</div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          ${fails>0?`<span style="background:rgba(205,32,38,0.2);color:#ff8080;font-size:10px;padding:2px 8px;border-radius:2px;font-family:'DM Mono',monospace;">${fails} VIOLATION${fails>1?'S':''}</span>`:''}
+          ${warns>0?`<span style="background:rgba(229,160,0,0.2);color:#ffd080;font-size:10px;padding:2px 8px;border-radius:2px;font-family:'DM Mono',monospace;">${warns} WARNING${warns>1?'S':''}</span>`:''}
+          ${passes>0?`<span style="background:rgba(46,133,64,0.2);color:#80d080;font-size:10px;padding:2px 8px;border-radius:2px;font-family:'DM Mono',monospace;">${passes} PASSED</span>`:''}
+        </div>
+      </div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;">
+      ${sorted.map(c => `
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:flex-start;">
+          <div style="width:22px;height:22px;border-radius:50%;background:${c.status==='pass'?'#2E8540':c.status==='fail'?'#CD2026':'#E5A000'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;margin-top:1px;">${c.status==='pass'?'✓':c.status==='fail'?'✗':'!'}</div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:2px;">${c.rule}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--gov-blue);margin-bottom:3px;">${c.title}</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.4;">${c.description}</div>
+            ${c.fix?`<div style="margin-top:6px;padding:6px 10px;background:#FFF8F0;border-left:3px solid #E5A000;font-size:11px;color:var(--text);line-height:1.4;"><strong style="display:block;font-size:10px;color:#E5A000;font-family:'DM Mono',monospace;margin-bottom:2px;">RECOMMENDED FIX</strong>${c.fix}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('btn-view-impact').style.display = 'inline-flex';
+}
+renderBuilderLabel();
+</script>
+</body>
+</html>
